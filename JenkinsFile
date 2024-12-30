@@ -1,0 +1,79 @@
+// Jenkinsfile
+pipeline {
+    agent any
+    environment {
+        MAVEN_HOME = 'C:\\Users\\amine\\Downloads\\apache-maven-3.9.9-bin\\apache-maven-3.9.9'
+        JAVA_HOME = 'C:\\Program Files\\java\\jdk-17'
+        DOCKER_IMAGE_NAME = 'image'
+        DOCKER_HOME = 'C:\\Program Files\\Docker\\Docker\\resources\\bin' // Chemin d'installation de Docker
+        PATH = "${DOCKER_HOME};${env.PATH}" // Ajoute le chemin Docker au PATH
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat "${MAVEN_HOME}\\bin\\mvn clean compile"
+            }
+        }
+        stage('Test') {
+            steps {
+                bat "${MAVEN_HOME}\\bin\\mvn test"
+            }
+        }
+        stage('Package') {
+            steps {
+                bat "${MAVEN_HOME}\\bin\\mvn package"
+            }
+        }
+        stage('Archive Artifacts') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+
+        stage('List Files') {
+            steps {
+                bat 'dir'
+                bat 'type DockerFile' // Vérifie que DockerFile existe bien et contient ce que vous attendez
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                script {
+                    echo 'Construction de l\'image Docker...'
+                    bat "docker build -t ${DOCKER_IMAGE_NAME} -f DockerFile ."
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    echo 'Déploiement de l\'application avec Docker...'
+                    bat """
+                        docker stop ${DOCKER_IMAGE_NAME} || exit 0
+                        docker rm ${DOCKER_IMAGE_NAME} || exit 0
+                        docker run -d -p 8080:8080 --name ${DOCKER_IMAGE_NAME} ${DOCKER_IMAGE_NAME}
+                    """
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline terminé avec succès !'
+        }
+        failure {
+            echo 'Pipeline échoué !'
+        }
+    }
+}
