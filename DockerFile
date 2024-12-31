@@ -1,4 +1,4 @@
-// DockerFile
+
 # Utilisation de l'image officielle Java 17
 FROM openjdk:17-jdk-slim
 
