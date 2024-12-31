@@ -2,7 +2,7 @@
 pipeline {
     agent any
     environment {
-        MAVEN_HOME = 'C:\\Users\\amine\\Downloads\\apache-maven-3.9.9-bin\\apache-maven-3.9.9'
+        MAVEN_HOME = 'C:\\Users\\amine\\Downloads\\apache-maven-3.9.9'
         JAVA_HOME = 'C:\\Program Files\\java\\jdk-17'
         DOCKER_IMAGE_NAME = 'image'
         DOCKER_HOME = 'C:\\Program Files\\Docker\\Docker\\resources\\bin' // Chemin d'installation de Docker
